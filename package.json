@@ -1,0 +1,26 @@
+{
+  "name": "@codedoon/dns",
+  "version": "1.0.0-alpha",
+  "description": "Set DNS easily",
+  "main": "main.js",
+  "bin": {
+    "dns": "./main.js"
+  },
+  "publishConfig": {
+    "@codedoon:registry": "https://www.npmjs.com/"
+  },
+  "scripts": {
+    "start": "node main"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/codedoon/dns.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/codedoon/dns/issues"
+  },
+  "homepage": "https://gitlab.com/codedoon/dns#readme"
+}
