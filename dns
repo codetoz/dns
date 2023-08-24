@@ -1,0 +1,176 @@
+#!/bin/bash
+
+DNS_MESSAGE_PREFIX="🥷"
+DNS_SET_MESSAGE="DNS_SET"
+DNS_COURRENT_MESSAGE="CURRENT_DNS"
+DNS_REMOVED_MESSAGE="DNS_REMOVED"
+NEW_LINE=$"\n"
+
+function dns_linux {
+  DNS_CURRENT=$(cat /etc/resolv.conf)
+  
+  if [[ $1 == "shecan" ]]
+    then
+        echo -e "nameserver 178.22.122.100${NEW_LINE}nameserver 185.51.200.2" > /etc/resolv.conf
+        echo "$DNS_MESSAGE_PREFIX $DNS_SET_MESSAGE [Shecan]"
+
+  elif [[ $1 == "begzar" ]]
+    then
+        echo -e "nameserver 185.55.226.26${NEW_LINE}nameserver 185.55.225.25" > /etc/resolv.conf
+        echo "$DNS_MESSAGE_PREFIX $DNS_SET_MESSAGE [Begzar]"
+
+  elif [[ $1 == "radar" ]]
+    then
+        echo -e "nameserver 10.202.10.10${NEW_LINE}nameserver 10.202.10.11" > /etc/resolv.conf
+        echo "$DNS_MESSAGE_PREFIX $DNS_SET_MESSAGE [Radar game]"
+
+  elif [[ $1 == "electro" ]]
+    then
+        echo -e "nameserver 78.157.42.100${NEW_LINE}nameserver 78.157.42.101" > /etc/resolv.conf
+        echo "$DNS_MESSAGE_PREFIX $DNS_SET_MESSAGE [Electro Team]"
+
+  elif [[ $1 == "403" ]]
+    then
+        echo -e "nameserver 10.202.10.202${NEW_LINE}nameserver 10.202.10.102" > /etc/resolv.conf
+        echo "$DNS_MESSAGE_PREFIX $DNS_SET_MESSAGE [403.online]"
+
+  elif [[ $1 == "asia" ]]
+    then
+        echo -e "nameserver 194.36.174.161${NEW_LINE}nameserver 178.22.122.100" > /etc/resolv.conf
+        echo "$DNS_MESSAGE_PREFIX $DNS_SET_MESSAGE [asiatech]"
+
+  elif [[ $1 == "cloud" ]]
+    then
+        echo -e "nameserver 1.1.1.1${NEW_LINE}nameserver 1.0.0.1" > /etc/resolv.conf
+        echo "$DNS_MESSAGE_PREFIX $DNS_SET_MESSAGE [Cloudflare]"
+
+  elif [[ $1 == "list" || $1 == "ls" ]]
+    then echo "$DNS_MESSAGE_PREFIX shecan radar electro begzar 403 asia cloudflare"
+
+  elif [[ $1 == "remove" || $1 == "rm" || $1 == "clear" ]]
+    then 
+      echo -e "nameserver 8.8.8.8${NEW_LINE}nameserver 8.8.4.4"> /etc/resolv.conf
+      echo "$DNS_MESSAGE_PREFIX $DNS_SET_MESSAGE [403.online]"
+
+  elif [[ $DNS_CURRENT == *"178.22.122.100"* ]]
+    then echo "$DNS_MESSAGE_PREFIX $DNS_COURRENT_MESSAGE [Shecan]"
+
+  elif [[ $DNS_CURRENT == *"10.202.10.10"* ]]
+    then echo "$DNS_MESSAGE_PREFIX $DNS_COURRENT_MESSAGE [Radar game]"
+
+  elif [[ $DNS_CURRENT == *"78.157.42.100"* ]]
+    then echo "$DNS_MESSAGE_PREFIX $DNS_COURRENT_MESSAGE [Electro Team]"
+  elif [[ $DNS_CURRENT == *"10.202.10.202"* ]]
+    then echo "$DNS_MESSAGE_PREFIX $DNS_COURRENT_MESSAGE [403.online]"
+
+  elif [[ $DNS_CURRENT == *"194.36.174.161"* ]]
+    then echo "$DNS_MESSAGE_PREFIX $DNS_COURRENT_MESSAGE [Asiatech]"
+
+  elif [[ $DNS_CURRENT == *"1.1.1.1"* ]]
+    then echo "$DNS_MESSAGE_PREFIX $DNS_COURRENT_MESSAGE [Cloudflare]"
+
+  elif [[ $DNS_CURRENT == *"185.55.226.26"* ]]
+    then echo "$DNS_MESSAGE_PREFIX $DNS_COURRENT_MESSAGE [Begzar]"
+
+  else 
+    echo "$DNS_MESSAGE_PREFIX NO_DNS"
+    cat /etc/resolv.conf
+
+  fi
+}
+
+function dns_mac {
+  DNS_CURRENT=$(networksetup -getdnsservers Wi-Fi)
+
+  if [[ $1 == "shecan" ]] 
+    then
+      echo "$DNS_MESSAGE_PREFIX $DNS_SET_MESSAGE [Shecan]"
+      networksetup -setdnsservers Wi-Fi  178.22.122.100 185.51.200.2
+
+  elif [[ $1 == "radar" ]] 
+    then
+      echo "$DNS_MESSAGE_PREFIX $DNS_SET_MESSAGE [Radar game]"
+      networksetup -setdnsservers Wi-Fi  10.202.10.10 10.202.10.11
+
+  elif [[ $1 == "electro" ]] 
+    then
+      echo "$DNS_MESSAGE_PREFIX $DNS_SET_MESSAGE [Electro Team]"
+      networksetup -setdnsservers Wi-Fi  78.157.42.100 78.157.42.101
+
+  elif [[ $1 == "begzar" ]] 
+    then
+      echo "$DNS_MESSAGE_PREFIX $DNS_SET_MESSAGE [Begzar]"
+      networksetup -setdnsservers Wi-Fi  185.55.226.26 185.55.225.25
+
+  elif [[ $1 == "403" ]] 
+    then
+      echo "$DNS_MESSAGE_PREFIX $DNS_SET_MESSAGE [403.online]"
+      networksetup -setdnsservers Wi-Fi  10.202.10.202 10.202.10.102
+
+  elif [[ $1 == "asia" ]] 
+    then
+      echo "$DNS_MESSAGE_PREFIX $DNS_SET_MESSAGE [asiatech]"
+      networksetup -setdnsservers Wi-Fi  194.36.174.161 178.22.122.100
+
+  elif [[ $1 == "cloud" ]] 
+    then
+      echo "$DNS_MESSAGE_PREFIX $DNS_SET_MESSAGE [Cloudflare]"
+      networksetup -setdnsservers Wi-Fi  1.1.1.1 1.0.0.1
+
+  elif [[ $1 == "rm" ]] || [[ $1 == "remove" ]] || [[ $1 == "clear" ]] 
+    then
+      networksetup -setdnsservers Wi-Fi  "empty"
+      echo "$DNS_MESSAGE_PREFIX $DNS_REMOVED_MESSAGE"
+
+  elif [[ $1 == "list" || $1 == "ls" ]]
+    then echo "$DNS_MESSAGE_PREFIX shecan radar electro begzar 403 asia cloud"
+
+  elif [[ $DNS_CURRENT == *"178.22.122.100"* ]]
+    then echo "$DNS_MESSAGE_PREFIX $DNS_COURRENT_MESSAGE [Shecan]"
+
+  elif [[ $DNS_CURRENT == *"10.202.10.10"* ]]
+    then echo "$DNS_MESSAGE_PREFIX $DNS_COURRENT_MESSAGE [Radar game]"
+
+  elif [[ $DNS_CURRENT == *"78.157.42.100"* ]]
+    then echo "$DNS_MESSAGE_PREFIX $DNS_COURRENT_MESSAGE [Electro Team]"
+
+  elif [[ $DNS_CURRENT == *"10.202.10.202"* ]]
+    then echo "$DNS_MESSAGE_PREFIX $DNS_COURRENT_MESSAGE [403.online]"
+
+  elif [[ $DNS_CURRENT == *"194.36.174.161"* ]]
+    then echo "$DNS_MESSAGE_PREFIX $DNS_COURRENT_MESSAGE [Asiatech]"
+
+  elif [[ $DNS_CURRENT == *"1.1.1.1"* ]]
+    then echo "$DNS_MESSAGE_PREFIX $DNS_COURRENT_MESSAGE [Cloudflare]"
+
+  elif [[ $DNS_CURRENT == *"185.55.226.26"* ]]
+    then echo "$DNS_MESSAGE_PREFIX $DNS_COURRENT_MESSAGE [Begzar]"
+
+  else echo "$DNS_MESSAGE_PREFIX NO_DNS"
+
+  fi
+}
+
+if [[ "$OSTYPE" == "linux-gnu"* ]] 
+  then dns_linux $1
+
+elif [[ "$OSTYPE" == "darwin"* ]] 
+  then dns_mac $1
+
+elif [[ "$OSTYPE" == "cygwin" ]] 
+  # POSIX compatibility layer and Linux environment emulation for Windows
+  then echo "cygwin"
+
+elif [[ "$OSTYPE" == "msys" ]] 
+  # Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
+  then echo "msys"
+
+elif [[ "$OSTYPE" == "win32" ]] 
+  # I'm not sure this can happen.
+  then echo "win32"
+
+elif [[ "$OSTYPE" == "freebsd"* ]] 
+  # ...
+  then echo "freebsd"
+        
+fi
