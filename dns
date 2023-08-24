@@ -8,34 +8,36 @@ NEW_LINE=$"\n"
 
 function help {
   echo "$DNS_MESSAGE_PREFIX Commands:
-    dns                             Show Current DNS
-    -----------------------------------------------------
-    dns dns-name                    Set Chosen DNS
-    -----------------------------------------------------
-    dns [-l/ls/list]                List DNS Options
-    -----------------------------------------------------
-    dns [-r/rm/remove/clear]        Remove DNS
-    -----------------------------------------------------
-    dns [-h/help]                   List Commands
-    -----------------------------------------------------"
+
+  dns                             Show Current DNS
+  -----------------------------------------------------
+  dns dns-name                    Set Chosen DNS
+  -----------------------------------------------------
+  dns [-l/ls/list]                List DNS Options
+  -----------------------------------------------------
+  dns [-r/rm/remove/clear]        Remove DNS
+  -----------------------------------------------------
+  dns [-h/help]                   List Commands
+  -----------------------------------------------------"
 }
 
 function list {
   echo "$DNS_MESSAGE_PREFIX List of DNS Options 
-    shecan
-    -----------------------------------------------------
-    radar
-    -----------------------------------------------------
-    electro
-    -----------------------------------------------------
-    begzar
-    -----------------------------------------------------
-    403
-    -----------------------------------------------------
-    asia
-    -----------------------------------------------------
-    cloudflare
-    -----------------------------------------------------"
+
+  shecan                   https://shecan.ir/
+  -----------------------------------------------------
+  radar                    https://radar.game/#/dns
+  -----------------------------------------------------
+  electro                  https://electrotm.org/
+  -----------------------------------------------------
+  begzar                   https://begzar.ir/
+  -----------------------------------------------------
+  403                      https://403.online/
+  -----------------------------------------------------
+  asia                     https://asiatech.cloud/
+  -----------------------------------------------------
+  cloudflare               https://www.cloudflare.com/
+  -----------------------------------------------------"
 }
 
 function dns_linux {
@@ -94,6 +96,7 @@ function dns_linux {
 
   elif [[ $DNS_CURRENT == *"78.157.42.100"* ]]
     then echo "$DNS_MESSAGE_PREFIX $DNS_COURRENT_MESSAGE [Electro Team]"
+
   elif [[ $DNS_CURRENT == *"10.202.10.202"* ]]
     then echo "$DNS_MESSAGE_PREFIX $DNS_COURRENT_MESSAGE [403.online]"
 
