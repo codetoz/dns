@@ -3,12 +3,6 @@
   "version": "1.0.0-alpha",
   "description": "Set DNS easily",
   "main": "main.js",
-  "bin": {
-    "dns": "./main.js"
-  },
-  "publishConfig": {
-    "@codedoon:registry": "https://www.npmjs.com/"
-  },
   "scripts": {
     "start": "node main"
   },
@@ -16,11 +10,13 @@
     "type": "git",
     "url": "git+https://gitlab.com/codedoon/dns.git"
   },
-  "keywords": [],
-  "author": "",
+  "author": "mahdidarabi7 mmd550",
   "license": "ISC",
   "bugs": {
     "url": "https://gitlab.com/codedoon/dns/issues"
   },
-  "homepage": "https://gitlab.com/codedoon/dns#readme"
+  "homepage": "https://gitlab.com/codedoon/dns#readme",
+  "bin": {
+    "dns": "./main.js"
+  }
 }
