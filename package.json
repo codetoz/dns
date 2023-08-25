@@ -1,10 +1,11 @@
 {
   "name": "@codedoon/dns",
-  "version": "1.0.0-alpha",
+  "version": "1.0.0-alpha-3",
   "description": "Set DNS easily",
   "main": "main.js",
   "scripts": {
-    "start": "node main"
+    "start": "node main",
+    "pub": "npm publish --access public"
   },
   "repository": {
     "type": "git",

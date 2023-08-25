@@ -1,6 +1,7 @@
 #! /usr/bin/env node
 
 "use strict";
+var { version: packageVersion } = require("./package.json");
 
 const { exec } = require("child_process");
 
@@ -49,10 +50,11 @@ const dnsOptions = [
 
 const commands = [
   { name: "dns [-s|set] <dns-name>", desc: "Set Chosen DNS" },
-  { name: "dns [-a|change]", desc: "Set Random Dns" },
+  { name: "dns [-alt|alter|change]", desc: "Set Random Dns" },
   { name: "dns [-r|rm|remove|clear]", desc: "Remove DNS" },
   { name: "dns [-c|crt|current]", desc: "Show Current DNS" },
   { name: "dns [-l|ls|list]", desc: "List DNS Options" },
+  { name: "dns [-v|--version|version]", desc: "Package Version" },
   { name: "dns [-h|help]", desc: "List Commands" },
 ];
 
@@ -83,6 +85,11 @@ async function bootstrap() {
 
   if (/(-l)|(ls)|(list)/.test(args[0])) {
     commandsHandlers.list();
+    return;
+  }
+
+  if (/(-v)|(--version)|(version)/.test(args[0])) {
+    commandsHandlers.version();
     return;
   }
 
@@ -211,10 +218,14 @@ async function getCommands() {
       opt.ips.find((ip) => currentDns.includes(ip))
     )?.name;
 
-    if (currentDnsName) message(`Current DNS [${currentDnsName}]`);
-    else message("Current DNS None");
+    if (currentDnsName) message(`Current DNS: [${currentDnsName}]`);
+    else message("Current DNS: No DNS");
 
     return currentDnsName;
+  }
+
+  function version() {
+    message(`Package Version: ${packageVersion}`);
   }
 
   function help() {
@@ -226,7 +237,15 @@ async function getCommands() {
     console.table(dnsOptions);
   }
 
-  return { help, list, setDns, removeDns, currentDns, changeDns };
+  return {
+    help,
+    list,
+    setDns,
+    removeDns,
+    currentDns,
+    changeDns,
+    version,
+  };
 }
 //#endregion
 
