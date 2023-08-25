@@ -48,11 +48,12 @@ const dnsOptions = [
 ];
 
 const commands = [
-  { name: "dns [-s|set] <dns-name> ", desc: "Set Chosen DNS" },
+  { name: "dns [-s|set] <dns-name>", desc: "Set Chosen DNS" },
+  { name: "dns [-a|change]", desc: "Set Random Dns" },
   { name: "dns [-r|rm|remove|clear]", desc: "Remove DNS" },
   { name: "dns [-c|crt|current]", desc: "Show Current DNS" },
-  { name: "dns [-l|ls|list] ", desc: "List DNS Options" },
-  { name: "dns [|-h|help]  ", desc: "List Commands" },
+  { name: "dns [-l|ls|list]", desc: "List DNS Options" },
+  { name: "dns [-h|help]", desc: "List Commands" },
 ];
 
 async function bootstrap() {
@@ -62,6 +63,11 @@ async function bootstrap() {
 
   if (/(-s)|(set)/.test(args[0])) {
     commandsHandlers.setDns(args);
+    return;
+  }
+
+  if (/(-a)|(change)/.test(args[0])) {
+    commandsHandlers.changeDns();
     return;
   }
 
@@ -93,6 +99,11 @@ function message(...message) {
   console.log(prefix, ...message);
 }
 
+function getRandomOption(list, exclude) {
+  const filtered = list.filter((option) => !exclude.includes(option.name));
+  return filtered[Math.floor(Math.random() * filtered.length)];
+}
+
 async function execute(command) {
   return new Promise(function (resolve) {
     exec(command, (err, stdout) => {
@@ -107,6 +118,7 @@ async function execute(command) {
 async function getOsType() {
   return execute("echo $OSTYPE");
 }
+
 //#endregion
 
 //#region commands
@@ -116,6 +128,20 @@ async function getCommands() {
   const isMac = osType.includes("darwin");
   const isLinux = osType.includes("linux-gnu");
 
+  async function getCurrentDnsName() {
+    let currentDns = "";
+
+    if (isMac) currentDns = await execute("networksetup -getdnsservers Wi-Fi");
+
+    if (isLinux) currentDns = await execute("cat /etc/resolv.conf");
+
+    const currentDnsName = dnsOptions.find((opt) =>
+      opt.ips.find((ip) => currentDns.includes(ip))
+    )?.name;
+
+    return currentDnsName;
+  }
+
   async function setDns(args) {
     if (args.length < 2) {
       message("Provide a DNS name from list of options\n");
@@ -123,13 +149,38 @@ async function getCommands() {
       return;
     }
 
-    const option = dnsOptions.find(opt => opt.name === args[1]);
+    const option = dnsOptions.find((opt) => opt.name === args[1]);
 
     if (!option) {
       message("Provide a valid DNS name\n");
       list();
       return;
     }
+
+    if (isMac) {
+      const ipString = option.ips.reduce(
+        (prev, current) => `${prev}${current} `,
+        ""
+      );
+
+      await execute(`networksetup -setdnsservers Wi-Fi ${ipString}`);
+    }
+
+    if (isLinux) {
+      const ipString = option.ips.reduce(
+        (prev, current) => `${prev}nameserver ${current}\n`,
+        ""
+      );
+
+      await execute(`echo "${ipString}" > /etc/resolv.conf`);
+    }
+
+    message(`DNS Set [${option.name}]`);
+  }
+
+  async function changeDns() {
+    const currentDnsName = await getCurrentDnsName();
+    const option = getRandomOption(dnsOptions, [currentDnsName]);
 
     if (isMac) {
       const ipString = option.ips.reduce(
@@ -164,15 +215,7 @@ async function getCommands() {
   }
 
   async function currentDns() {
-    let currentDns = "";
-
-    if (isMac) currentDns = await execute("networksetup -getdnsservers Wi-Fi");
-
-    if (isLinux) currentDns = await execute("cat /etc/resolv.conf");
-
-    const currentDnsName = dnsOptions.find(opt =>
-      opt.ips.find(ip => currentDns.includes(ip))
-    )?.name;
+    const currentDnsName = await getCurrentDnsName();
 
     if (currentDnsName) message(`Current DNS [${currentDnsName}]`);
     else message("No DNS");
@@ -187,7 +230,7 @@ async function getCommands() {
     console.table(dnsOptions);
   }
 
-  return { help, list, setDns, removeDns, currentDns };
+  return { help, list, setDns, removeDns, currentDns, changeDns };
 }
 //#endregion
 
