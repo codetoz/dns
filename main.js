@@ -128,20 +128,6 @@ async function getCommands() {
   const isMac = osType.includes("darwin");
   const isLinux = osType.includes("linux-gnu");
 
-  async function getCurrentDnsName() {
-    let currentDns = "";
-
-    if (isMac) currentDns = await execute("networksetup -getdnsservers Wi-Fi");
-
-    if (isLinux) currentDns = await execute("cat /etc/resolv.conf");
-
-    const currentDnsName = dnsOptions.find((opt) =>
-      opt.ips.find((ip) => currentDns.includes(ip))
-    )?.name;
-
-    return currentDnsName;
-  }
-
   async function setDns(args) {
     if (args.length < 2) {
       message("Provide a DNS name from list of options\n");
@@ -179,8 +165,8 @@ async function getCommands() {
   }
 
   async function changeDns() {
-    const currentDnsName = await getCurrentDnsName();
-    const option = getRandomOption(dnsOptions, [currentDnsName]);
+    const currentDnsName = await currentDns();
+    const option = getRandomOption(dnsOptions, [currentDnsName, "google"]);
 
     if (isMac) {
       const ipString = option.ips.reduce(
@@ -215,10 +201,20 @@ async function getCommands() {
   }
 
   async function currentDns() {
-    const currentDnsName = await getCurrentDnsName();
+    let currentDns = "";
+
+    if (isMac) currentDns = await execute("networksetup -getdnsservers Wi-Fi");
+
+    if (isLinux) currentDns = await execute("cat /etc/resolv.conf");
+
+    const currentDnsName = dnsOptions.find((opt) =>
+      opt.ips.find((ip) => currentDns.includes(ip))
+    )?.name;
 
     if (currentDnsName) message(`Current DNS [${currentDnsName}]`);
-    else message("No DNS");
+    else message("Current DNS None");
+
+    return currentDnsName;
   }
 
   function help() {
