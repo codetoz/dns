@@ -68,7 +68,7 @@ async function bootstrap() {
     return;
   }
 
-  if (/(-a)|(change)/.test(args[0])) {
+  if (/(-a)|(alter)|(change)/.test(args[0])) {
     commandsHandlers.changeDns();
     return;
   }
