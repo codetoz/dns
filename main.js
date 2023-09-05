@@ -3,6 +3,7 @@
 "use strict";
 var { version: packageVersion } = require("./package.json");
 
+var { platform } = require("os");
 const { exec } = require("child_process");
 
 const dnsOptions = [
@@ -107,7 +108,7 @@ function message(...message) {
 }
 
 function getRandomOption(list, exclude) {
-  const filtered = list.filter((option) => !exclude.includes(option.name));
+  const filtered = list.filter(option => !exclude.includes(option.name));
   return filtered[Math.floor(Math.random() * filtered.length)];
 }
 
@@ -122,8 +123,8 @@ async function execute(command) {
   });
 }
 
-async function getOsType() {
-  return execute("echo $OSTYPE");
+async function getPlatform() {
+  return platform();
 }
 
 //#endregion
@@ -131,9 +132,9 @@ async function getOsType() {
 //#region commands
 
 async function getCommands() {
-  const osType = await getOsType();
+  const osType = await getPlatform();
   const isMac = osType.includes("darwin");
-  const isLinux = osType.includes("linux-gnu");
+  const isLinux = osType.includes("linux");
 
   async function setDns(args) {
     if (args.length < 2) {
@@ -142,7 +143,7 @@ async function getCommands() {
       return;
     }
 
-    const option = dnsOptions.find((opt) => opt.name === args[1]);
+    const option = dnsOptions.find(opt => opt.name === args[1]);
 
     if (!option) {
       message("Provide a valid DNS name\n");
@@ -161,7 +162,7 @@ async function getCommands() {
 
     if (isLinux) {
       const ipString = option.ips.reduce(
-        (prev, current) => `${prev}nameserver ${current}\n`,
+        (prev, current) => `${prev}\nnameserver ${current}`,
         ""
       );
 
@@ -186,7 +187,7 @@ async function getCommands() {
 
     if (isLinux) {
       const ipString = option.ips.reduce(
-        (prev, current) => `${prev}nameserver ${current}\n`,
+        (prev, current) => `${prev}\nnameserver ${current}`,
         ""
       );
 
@@ -199,10 +200,11 @@ async function getCommands() {
   async function removeDns() {
     if (isMac) await execute('networksetup -setdnsservers Wi-Fi "empty"');
 
-    if (isLinux)
-      await execute(
-        `echo -e "nameserver 8.8.8.8\nnameserver 8.8.4.4" > /etc/resolv.conf`
-      );
+    if (isLinux) {
+      const ipString = "nameserver 8.8.8.8\nnameserver 8.8.4.4";
+
+      await execute(`echo "${ipString}" > /etc/resolv.conf`);
+    }
 
     message("DNS Removed");
   }
@@ -214,8 +216,8 @@ async function getCommands() {
 
     if (isLinux) currentDns = await execute("cat /etc/resolv.conf");
 
-    const currentDnsName = dnsOptions.find((opt) =>
-      opt.ips.find((ip) => currentDns.includes(ip))
+    const currentDnsName = dnsOptions.find(opt =>
+      opt.ips.find(ip => currentDns.includes(ip))
     )?.name;
 
     if (currentDnsName) message(`Current DNS: [${currentDnsName}]`);
