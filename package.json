@@ -1,6 +1,6 @@
 {
   "name": "@codedoon/dns",
-  "version": "1.0.0-alpha-8",
+  "version": "1.0.0-alpha-9",
   "description": "Set DNS easily",
   "main": "main.js",
   "scripts": {
@@ -19,5 +19,13 @@
   "homepage": "https://gitlab.com/codedoon/dns#readme",
   "bin": {
     "dns": "./main.js"
-  }
+  },
+  "keywords": [
+    "dns",
+    "npm",
+    "package",
+    "dnsChanger",
+    "commandLine",
+    "cli"
+  ]
 }
