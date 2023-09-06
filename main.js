@@ -13,6 +13,11 @@ const dnsOptions = [
     address: "https://shecan.ir/",
   },
   {
+    name: "hostiran",
+    ips: ["172.29.0.100", "172.29.2.100"],
+    address: "https://hostiran.net/landing/proxy",
+  },
+  {
     name: "begzar",
     ips: ["185.55.226.26", "185.55.225.25"],
     address: "https://begzar.ir/",
@@ -29,7 +34,7 @@ const dnsOptions = [
   },
   {
     name: "403",
-    ips: ["10.202.10.202", "10.202.10.102"],
+    ips: ["10.202.10.202"],
     address: "https://403.online/",
   },
   {
@@ -108,7 +113,7 @@ function message(...message) {
 }
 
 function getRandomOption(list, exclude) {
-  const filtered = list.filter(option => !exclude.includes(option.name));
+  const filtered = list.filter((option) => !exclude.includes(option.name));
   return filtered[Math.floor(Math.random() * filtered.length)];
 }
 
@@ -143,7 +148,7 @@ async function getCommands() {
       return;
     }
 
-    const option = dnsOptions.find(opt => opt.name === args[1]);
+    const option = dnsOptions.find((opt) => opt.name === args[1]);
 
     if (!option) {
       message("Provide a valid DNS name\n");
@@ -216,8 +221,11 @@ async function getCommands() {
 
     if (isLinux) currentDns = await execute("cat /etc/resolv.conf");
 
-    const currentDnsName = dnsOptions.find(opt =>
-      opt.ips.find(ip => currentDns.includes(ip))
+    const currentDnsName = dnsOptions.find((opt) =>
+      opt.ips.find((ip) => {
+        const regex = new RegExp(`(^${ip}\n)|(\n${ip}$)|(\n${ip}\n)`, "g");
+        return regex.test(currentDns);
+      })
     )?.name;
 
     if (currentDnsName) message(`Current DNS: [${currentDnsName}]`);
