@@ -1,6 +1,6 @@
 {
   "name": "@codedoon/dns",
-  "version": "1.0.0-alpha-7",
+  "version": "1.0.0-alpha-8",
   "description": "Set DNS easily",
   "main": "main.js",
   "scripts": {
