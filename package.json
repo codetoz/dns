@@ -1,5 +1,5 @@
 {
-  "name": "@codedoon/dns",
+  "name": "@codetoz/dns",
   "version": "1.0.0-alpha-11",
   "description": "Set DNS easily",
   "main": "main.js",
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://gitlab.com/codedoon/dns.git"
+    "url": "git+https://github.com/codetoz/dns.git"
   },
   "author": "mahdidarabi7 mmd550",
   "license": "ISC",
   "bugs": {
-    "url": "https://gitlab.com/codedoon/dns/issues"
+    "url": "https://github.com/codetoz/dns/issues"
   },
-  "homepage": "https://gitlab.com/codedoon/dns#readme",
+  "homepage": "https://github.com/codetoz/dns#readme",
   "bin": {
     "dns": "./main.js"
   },
