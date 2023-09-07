@@ -225,7 +225,6 @@ async function getCommands() {
     const ipPattern = /(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/g;
 
     let ips = ipPattern.exec(currentDns);
-    console.log(ips)
     if (ips !== null && ips.length > 1) {
       currentDnsName = dnsOptions.find((opt) =>
         opt.ips.find((optionIp) => optionIp === ips[0])
