@@ -13,6 +13,11 @@ const dnsOptions = [
     address: "https://shecan.ir/",
   },
   {
+    name: "403",
+    ips: ["10.202.10.202", "10.202.10.102"],
+    address: "https://403.online/",
+  },
+  {
     name: "hostiran",
     ips: ["172.29.0.100", "172.29.2.100"],
     address: "https://hostiran.net/landing/proxy",
@@ -28,11 +33,6 @@ const dnsOptions = [
     address: "https://electrotm.org/",
   },
   {
-    name: "403",
-    ips: ["10.202.10.202", "10.202.10.102"],
-    address: "https://403.online/",
-  },
-  {
     name: "radar",
     ips: ["10.202.10.10", "10.202.10.11"],
     address: "https://radar.game/#/dns",
@@ -41,6 +41,26 @@ const dnsOptions = [
     name: "asiatech",
     ips: ["194.36.174.161", "178.22.122.100"],
     address: "https://asiatech.cloud/",
+  },
+  {
+    name: "asrenovin",
+    ips: ["46.224.1.42", "178.22.122.100"],
+    address: "",
+  },
+  {
+    name: "tums",
+    ips: ["194.225.62.80", "178.22.122.100"],
+    address: "",
+  },
+  {
+    name: "pishgaman",
+    ips: ["5.202.100.101", "178.22.122.100"],
+    address: "",
+  },
+  {
+    name: "parsonline",
+    ips: ["91.99.101.12", "178.22.122.100"],
+    address: "",
   },
   {
     name: "cloud",
