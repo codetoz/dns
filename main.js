@@ -18,6 +18,11 @@ const dnsOptions = [
     address: "https://403.online/",
   },
   {
+    name: "server",
+    ips: ["194.104.158.48", "194.104.158.78"],
+    address: "https://server.ir",
+  },
+  {
     name: "hostiran",
     ips: ["172.29.0.100", "172.29.2.100"],
     address: "https://hostiran.net/landing/proxy",
