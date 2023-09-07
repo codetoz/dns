@@ -28,18 +28,18 @@ const dnsOptions = [
     address: "https://electrotm.org/",
   },
   {
+    name: "403",
+    ips: ["10.202.10.202", "10.202.10.102"],
+    address: "https://403.online/",
+  },
+  {
     name: "radar",
     ips: ["10.202.10.10", "10.202.10.11"],
     address: "https://radar.game/#/dns",
   },
   {
-    name: "403",
-    ips: ["10.202.10.202"],
-    address: "https://403.online/",
-  },
-  {
     name: "asiatech",
-    ips: ["194.36.174.161"],
+    ips: ["194.36.174.161", "178.22.122.100"],
     address: "https://asiatech.cloud/",
   },
   {
@@ -216,20 +216,24 @@ async function getCommands() {
 
   async function currentDns() {
     let currentDns = "";
+    let currentDnsName = "";
 
     if (isMac) currentDns = await execute("networksetup -getdnsservers Wi-Fi");
 
     if (isLinux) currentDns = await execute("cat /etc/resolv.conf");
 
-    const currentDnsName = dnsOptions.find((opt) =>
-      opt.ips.find((ip) => {
-        const regex = new RegExp(`(^${ip}\n)|(\n${ip}$)|(\n${ip}\n)`, "g");
-        return regex.test(currentDns);
-      })
-    )?.name;
+    const ipPattern = /(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/g;
 
-    if (currentDnsName) message(`Current DNS: [${currentDnsName}]`);
-    else message("Current DNS: No DNS");
+    let ips = ipPattern.exec(currentDns);
+    console.log(ips)
+    if (ips !== null && ips.length > 1) {
+      currentDnsName = dnsOptions.find((opt) =>
+        opt.ips.find((optionIp) => optionIp === ips[0])
+      )?.name;
+
+      if (currentDnsName) message(`Current DNS: [${currentDnsName}]`);
+      else message("Current DNS: No DNS");
+    } else message("Current DNS: No DNS");
 
     return currentDnsName;
   }
