@@ -6,7 +6,6 @@ const { version: packageVersion } = require("./package.json");
 const { platform, release } = require("os");
 const { exec } = require("child_process");
 const { getServers: getDnsServers } = require("dns");
-const { isAdmin } = require("is-admin");
 const { get_interfaces_list: getNetworkInterfacesList } = require("network");
 
 const dnsOptions = [
@@ -210,7 +209,7 @@ async function getCommands() {
     }
 
     if (isWindows) {
-      const isAdministrator = await isAdmin();
+      const isAdministrator = await require("is-admin")();
       if (!isAdministrator) {
         message("Administrator privilege are required to change DNS settings");
         return false;
@@ -259,7 +258,7 @@ async function getCommands() {
     // return currentDnsName;
 
     if (isWindows) {
-      const isAdministrator = await isAdmin();
+      const isAdministrator = await require("is-admin")();
       if (!isAdministrator) {
         message("Administrator privilege are required to change DNS settings");
         return null;

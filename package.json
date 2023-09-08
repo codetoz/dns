@@ -1,6 +1,6 @@
 {
   "name": "@codetoz/dns",
-  "version": "1.0.0-alpha-11",
+  "version": "1.0.0-alpha-13",
   "description": "Set DNS easily",
   "main": "main.js",
   "scripts": {
