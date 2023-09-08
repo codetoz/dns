@@ -27,5 +27,9 @@
     "dnsChanger",
     "commandLine",
     "cli"
-  ]
+  ],
+  "dependencies": {
+    "is-admin": "^4.0.0",
+    "network": "^0.6.1"
+  }
 }

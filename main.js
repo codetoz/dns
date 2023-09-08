@@ -3,8 +3,11 @@
 "use strict";
 var { version: packageVersion } = require("./package.json");
 
-var { platform } = require("os");
+var { platform, release } = require("os");
 const { exec } = require("child_process");
+const isAdmin = require("is-admin");
+const network = require("network");
+const dns = require("dns");
 
 const dnsOptions = [
   {
@@ -110,7 +113,7 @@ async function bootstrap() {
   }
 
   if (/(-c)|(crt)|(current)/.test(args[0])) {
-    commandsHandlers.currentDns();
+    commandsHandlers.showCurrentDns();
     return;
   }
 
@@ -157,6 +160,27 @@ async function getPlatform() {
   return platform();
 }
 
+async function printCurrentDnsName(dnsName) {
+  if (dnsName) message(`Current DNS: [${dnsName}]`);
+  else message("Current DNS: No DNS");
+}
+
+// #region windows-helpers
+function _determinePowershellOrNetsh() {
+  // if version is Windows 7 or below use netsh
+  var releaseVer = release().split(".");
+  if (
+    (parseInt(releaseVer[0]) <= 6 && parseInt(releaseVer[1]) <= 1) ||
+    parseInt(releaseVer[0]) == 5
+  ) {
+    // use netsh
+    return true;
+  }
+  // use powershell
+  return false;
+}
+//#endregion
+
 //#endregion
 
 //#region commands
@@ -165,6 +189,89 @@ async function getCommands() {
   const osType = await getPlatform();
   const isMac = osType.includes("darwin");
   const isLinux = osType.includes("linux");
+  const isWindows = osType.includes("win32");
+  let isAdministrator = false;
+  if (isWindows) isAdministrator = await isAdmin();
+
+  async function set(ips) {
+    if (isMac) {
+      const ipString = ips.reduce((prev, current) => `${prev}${current} `, "");
+
+      await execute(`networksetup -setdnsservers Wi-Fi ${ipString}`);
+      return true;
+    }
+
+    if (isLinux) {
+      const ipString = ips.reduce(
+        (prev, current) => `${prev}\nnameserver ${current}`,
+        ""
+      );
+
+      await execute(`echo "${ipString}" > /etc/resolv.conf`);
+      return true;
+    }
+
+    if (isWindows) {
+      if (!isAdministrator) {
+        message("Administrator privilege are required to change DNS settings");
+        return false;
+      }
+      let interfaces;
+      network.get_interfaces_list(async function (err, obj) {
+        interfaces = obj;
+        for (x in interfaces) {
+          // set DNS servers per ethernet interface
+          if (_determinePowershellOrNetsh() || windowsPreferNetsh === true) {
+            await execute(
+              `netsh interface ipv4 set dns name="${interfaces[x].name}" static "${ips[0]}" primary`
+            );
+            await execute(
+              `netsh interface ipv4 add dns name="${interfaces[x].name}" "${ips[1]}" index=2`
+            );
+          } else {
+            await execute(
+              `powershell Set-DnsClientServerAddress -InterfaceAlias '${interfaces[x].name}' -ServerAddresses '${ips[0]},${ips[1]}'`
+            );
+          }
+        }
+        await execute("ipconfig /flushdns");
+        return true;
+      });
+    }
+  }
+
+  async function get() {
+    // let currentDns = "";
+    let currentDnsName = "";
+
+    // if (isMac) currentDns = await execute("networksetup -getdnsservers Wi-Fi");
+
+    // if (isLinux) currentDns = await execute("cat /etc/resolv.conf");
+
+    // const ipPattern = /(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/g;
+
+    // let ips = ipPattern.exec(currentDns);
+    // if (ips !== null && ips.length > 1) {
+    //   currentDnsName = dnsOptions.find((opt) =>
+    //     opt.ips.find((optionIp) => optionIp === ips[0])
+    //   )?.name;
+    // }
+
+    // return currentDnsName;
+
+    if (isWindows && !isAdministrator) {
+      message("Administrator privilege are required to change DNS settings");
+      return currentDnsName;
+    }
+
+    const ips = dns.getServers();
+    if (ips !== null && ips.length > 1) {
+      currentDnsName = dnsOptions.find((opt) =>
+        opt.ips.find((optionIp) => optionIp === ips[0])
+      )?.name;
+    }
+    return currentDnsName;
+  }
 
   async function setDns(args) {
     if (args.length < 2) {
@@ -181,50 +288,17 @@ async function getCommands() {
       return;
     }
 
-    if (isMac) {
-      const ipString = option.ips.reduce(
-        (prev, current) => `${prev}${current} `,
-        ""
-      );
+    const successful = await set(option.ips);
 
-      await execute(`networksetup -setdnsservers Wi-Fi ${ipString}`);
-    }
-
-    if (isLinux) {
-      const ipString = option.ips.reduce(
-        (prev, current) => `${prev}\nnameserver ${current}`,
-        ""
-      );
-
-      await execute(`echo "${ipString}" > /etc/resolv.conf`);
-    }
-
-    message(`DNS Set [${option.name}]`);
+    successful && message(`DNS Set [${option.name}]`);
   }
 
   async function changeDns() {
-    const currentDnsName = await currentDns();
+    const currentDnsName = await get();
+    printCurrentDnsName(currentDnsName);
     const option = getRandomOption(dnsOptions, [currentDnsName, "google"]);
-
-    if (isMac) {
-      const ipString = option.ips.reduce(
-        (prev, current) => `${prev}${current} `,
-        ""
-      );
-
-      await execute(`networksetup -setdnsservers Wi-Fi ${ipString}`);
-    }
-
-    if (isLinux) {
-      const ipString = option.ips.reduce(
-        (prev, current) => `${prev}\nnameserver ${current}`,
-        ""
-      );
-
-      await execute(`echo "${ipString}" > /etc/resolv.conf`);
-    }
-
-    message(`DNS Set [${option.name}]`);
+    const successful = await set(option.ips);
+    successful && message(`DNS Set [${option.name}]`);
   }
 
   async function removeDns() {
@@ -239,27 +313,9 @@ async function getCommands() {
     message("DNS Removed");
   }
 
-  async function currentDns() {
-    let currentDns = "";
-    let currentDnsName = "";
-
-    if (isMac) currentDns = await execute("networksetup -getdnsservers Wi-Fi");
-
-    if (isLinux) currentDns = await execute("cat /etc/resolv.conf");
-
-    const ipPattern = /(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/g;
-
-    let ips = ipPattern.exec(currentDns);
-    if (ips !== null && ips.length > 1) {
-      currentDnsName = dnsOptions.find((opt) =>
-        opt.ips.find((optionIp) => optionIp === ips[0])
-      )?.name;
-
-      if (currentDnsName) message(`Current DNS: [${currentDnsName}]`);
-      else message("Current DNS: No DNS");
-    } else message("Current DNS: No DNS");
-
-    return currentDnsName;
+  async function showCurrentDns() {
+    const dnsName = await get();
+    printCurrentDnsName(dnsName);
   }
 
   function version() {
@@ -280,7 +336,7 @@ async function getCommands() {
     list,
     setDns,
     removeDns,
-    currentDns,
+    showCurrentDns,
     changeDns,
     version,
   };
