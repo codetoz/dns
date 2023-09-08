@@ -1,13 +1,13 @@
 #! /usr/bin/env node
 
 "use strict";
-var { version: packageVersion } = require("./package.json");
+const { version: packageVersion } = require("./package.json");
 
-var { platform, release } = require("os");
+const { platform, release } = require("os");
 const { exec } = require("child_process");
-const isAdmin = require("is-admin");
-const network = require("network");
-const dns = require("dns");
+const { getServers: getDnsServers } = require("dns");
+const { isAdmin } = require("is-admin");
+const { get_interfaces_list: getNetworkInterfacesList } = require("network");
 
 const dnsOptions = [
   {
@@ -166,7 +166,7 @@ async function printCurrentDnsName(dnsName) {
 }
 
 // #region windows-helpers
-function _determinePowershellOrNetsh() {
+function determinePowershellOrNetsh() {
   // if version is Windows 7 or below use netsh
   var releaseVer = release().split(".");
   if (
@@ -190,8 +190,6 @@ async function getCommands() {
   const isMac = osType.includes("darwin");
   const isLinux = osType.includes("linux");
   const isWindows = osType.includes("win32");
-  let isAdministrator = false;
-  if (isWindows) isAdministrator = await isAdmin();
 
   async function set(ips) {
     if (isMac) {
@@ -212,16 +210,17 @@ async function getCommands() {
     }
 
     if (isWindows) {
+      const isAdministrator = await isAdmin();
       if (!isAdministrator) {
         message("Administrator privilege are required to change DNS settings");
         return false;
       }
-      let interfaces;
-      network.get_interfaces_list(async function (err, obj) {
-        interfaces = obj;
+
+      getNetworkInterfacesList(async function (err, obj) {
+        const interfaces = obj;
+        // set DNS servers per ethernet interface
         for (x in interfaces) {
-          // set DNS servers per ethernet interface
-          if (_determinePowershellOrNetsh() || windowsPreferNetsh === true) {
+          if (determinePowershellOrNetsh() || windowsPreferNetsh === true) {
             await execute(
               `netsh interface ipv4 set dns name="${interfaces[x].name}" static "${ips[0]}" primary`
             );
@@ -259,13 +258,16 @@ async function getCommands() {
 
     // return currentDnsName;
 
-    if (isWindows && !isAdministrator) {
-      message("Administrator privilege are required to change DNS settings");
-      return currentDnsName;
+    if (isWindows) {
+      const isAdministrator = await isAdmin();
+      if (!isAdministrator) {
+        message("Administrator privilege are required to change DNS settings");
+        return null;
+      }
     }
 
-    const ips = dns.getServers();
-    if (ips !== null && ips.length > 1) {
+    const ips = getDnsServers();
+    if (ips !== null && ips.length >= 1) {
       currentDnsName = dnsOptions.find((opt) =>
         opt.ips.find((optionIp) => optionIp === ips[0])
       )?.name;
