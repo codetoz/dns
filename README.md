@@ -10,10 +10,38 @@ Use npm:
 sudo npm i -g @codetoz/dns
 ```
 
+If you do not have nodejs or want to use executable versions:
+for linux and mac
+
+```sh
+# macos linux
+platform=macos
+# x64 arm64
+arch=arm64
+
+curl -o dns https://github.com/codetoz/dns/releases/download/1.0.0-alpha-15/dns-$platform-$arch
+```
+
+after that you can move it to your `bin`:
+
+```sh
+# linux
+mv dns /usr/bin/
+
+# mac
+mv dns /usr/local/bin/
+```
+
+for windows download the below link and add it to your `PATH`:
+
+`https://github.com/codetoz/dns/releases/download/1.0.0-alpha-15/dns-win-x64.exe`
+
 ## Commands
 
-`dns [-s|set] <dns-name>` Set Chosen DNS  
-`dns [-r|rm|remove|clear]` Remove DNS  
-`dns [-c|crt|current]` Show Current DNS  
-`dns [-l|ls|list]` List DNS Options  
-`dns [|-h|help]` List Commands
+- `dns [-s|set] <dns-name>` Set Chosen DNS
+- `dns [-alt|alter|change]` Set Random Dns
+- `dns [-r|rm|remove|clear]` Remove DNS
+- `dns [-c|crt|current]` Show Current DNS
+- `dns [-l|ls|list]` List DNS Options
+- `dns [-v|--version|version]` Show Package Version
+- `dns [ |-h|help]` List Commands
