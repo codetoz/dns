@@ -1,5 +1,5 @@
 export interface ICommandHandler {
-  help: () => void
+  help: () => Promise<void>
   list: () => void
   setDns: (args: string[]) => Promise<void>
   removeDns: () => Promise<void>

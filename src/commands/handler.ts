@@ -158,7 +158,8 @@ export class CommandHandler implements ICommandHandler {
     message(`Package Version: ${packageVersion}`)
   }
 
-  help(): void {
+  async help(): Promise<void> {
+    await this.showCurrentDns()
     message('Commands:')
     console.table(commandOptions)
   }

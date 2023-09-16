@@ -39,7 +39,7 @@ async function bootstrap(): Promise<void> {
   }
 
   if (commandPatterns.HELP.test(args[0])) {
-    commandsHandler.help()
+    await commandsHandler.help()
     return
   }
 }
