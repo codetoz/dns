@@ -1,5 +1,6 @@
-export * from './command-options'
+export * from './options'
 export * from './handler'
 export * from './handler.interface'
 export * from './option.interface'
 export * from './platform.enum'
+export * from './patterns'

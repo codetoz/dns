@@ -9,9 +9,9 @@ import {
   message,
   packageVersion,
 } from '../helpers'
-import { commandOptions } from './command-options'
+import { commandOptions } from './options'
 import { IDnsProvider, dnsProviders } from '../data'
-import { platformEnum } from './platform.enum'
+import { PlatformEnum } from './platform.enum'
 
 export class CommandHandler implements ICommandHandler {
   isMac: boolean
@@ -22,9 +22,9 @@ export class CommandHandler implements ICommandHandler {
 
   async init() {
     const osType = await getPlatform()
-    this.isMac = osType.includes(platformEnum.MACOS)
-    this.isLinux = osType.includes(platformEnum.LINUX)
-    this.isWindows = osType.includes(platformEnum.WINDOWS)
+    this.isMac = osType.includes(PlatformEnum.MACOS)
+    this.isLinux = osType.includes(PlatformEnum.LINUX)
+    this.isWindows = osType.includes(PlatformEnum.WINDOWS)
   }
 
   private async set(ips: string[]) {
