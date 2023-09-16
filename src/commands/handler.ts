@@ -1,6 +1,9 @@
 import { getServers as getDnsServers } from 'dns'
 import { get_interfaces_list as getNetworkInterfacesList } from 'network'
+import { commandOptions } from './options'
+import { PlatformEnum } from './platform.enum'
 import { ICommandHandler } from './handler.interface'
+import { IDnsProvider, dnsProviders } from '../data'
 import {
   execute,
   getPlatform,
@@ -9,9 +12,6 @@ import {
   message,
   packageVersion,
 } from '../helpers'
-import { commandOptions } from './options'
-import { IDnsProvider, dnsProviders } from '../data'
-import { PlatformEnum } from './platform.enum'
 
 export class CommandHandler implements ICommandHandler {
   isMac: boolean
@@ -46,56 +46,45 @@ export class CommandHandler implements ICommandHandler {
     }
 
     if (this.isWindows) {
-      const isAdministrator = await isAdmin()
+      const isAdministrator = isAdmin()
       if (!isAdministrator) {
         message('Administrator privilege are required to change DNS settings')
         return false
       }
 
-      getNetworkInterfacesList(async function (err, obj: { name: string }[]) {
-        const interfaces = obj
-        // set DNS servers per ethernet interface
-        for (const inf in interfaces) {
-          if (isNetsh() /*|| windowsPreferNetsh === true*/) {
-            await execute(
-              `netsh interface ipv4 set dns name="${interfaces[inf].name}" static "${ips[0]}" primary`
-            )
-            await execute(
-              `netsh interface ipv4 add dns name="${interfaces[inf].name}" "${ips[1]}" index=2`
-            )
-          } else {
-            await execute(
-              `powershell Set-DnsClientServerAddress -InterfaceAlias '${interfaces[inf].name}' -ServerAddresses '${ips[0]},${ips[1]}'`
-            )
+      return new Promise((resolve, reject) => {
+        getNetworkInterfacesList(async function (err, obj: { name: string }[]) {
+          if (err) reject(err)
+          try {
+            const interfaces = obj
+            // set DNS servers per ethernet interface
+            for (const inf in interfaces) {
+              if (isNetsh() /*|| windowsPreferNetsh === true*/) {
+                await execute(
+                  `netsh interface ipv4 set dns name="${interfaces[inf].name}" static "${ips[0]}" primary`
+                )
+                await execute(
+                  `netsh interface ipv4 add dns name="${interfaces[inf].name}" "${ips[1]}" index=2`
+                )
+              } else {
+                await execute(
+                  `powershell Set-DnsClientServerAddress -InterfaceAlias '${interfaces[inf].name}' -ServerAddresses '${ips[0]},${ips[1]}'`
+                )
+              }
+            }
+            await execute('ipconfig /flushdns')
+            resolve(true)
+          } catch (e) {
+            resolve(false)
           }
-        }
-        await execute('ipconfig /flushdns')
-        return true
+        })
       })
     }
   }
 
   private async get(): Promise<string> {
-    // let currentDns = "";
-    let currentDnsName = ''
-
-    // if (isMac) currentDns = await execute("networksetup -getdnsservers Wi-Fi");
-
-    // if (isLinux) currentDns = await execute("cat /etc/resolv.conf");
-
-    // const ipPattern = /(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/g;
-
-    // let ips = ipPattern.exec(currentDns);
-    // if (ips !== null && ips.length > 1) {
-    //   currentDnsName = dnsOptions.find((opt) =>
-    //     opt.ips.find((optionIp) => optionIp === ips[0])
-    //   )?.name;
-    // }
-
-    // return currentDnsName;
-
     if (this.isWindows) {
-      const isAdministrator = await isAdmin()
+      const isAdministrator = isAdmin()
       if (!isAdministrator) {
         message('Administrator privilege are required to change DNS settings')
         return null
@@ -104,11 +93,13 @@ export class CommandHandler implements ICommandHandler {
 
     const ips = getDnsServers()
     if (ips !== null && ips.length >= 1) {
-      currentDnsName = dnsProviders.find((opt) =>
+      const name = dnsProviders.find((opt) =>
         opt.ips.find((optionIp) => optionIp === ips[0])
       )?.name
+      return name ?? ''
     }
-    return currentDnsName
+
+    return ''
   }
 
   async setDns(args: string[]) {
@@ -143,15 +134,19 @@ export class CommandHandler implements ICommandHandler {
   }
 
   async removeDns(): Promise<void> {
-    if (this.isMac) await execute('networksetup -setdnsservers Wi-Fi "empty"')
-
-    if (this.isLinux) {
-      const ipString = 'nameserver 8.8.8.8\nnameserver 8.8.4.4'
-
-      await execute(`echo "${ipString}" > /etc/resolv.conf`)
+    if (this.isMac) {
+      await execute('networksetup -setdnsservers Wi-Fi "empty"')
+      message('DNS Removed')
     }
 
-    message('DNS Removed')
+    if (this.isLinux || this.isWindows) {
+      const googleDns = dnsProviders.find((dns) => dns.name === 'google')
+
+      if (googleDns) {
+        const successful = await this.set(googleDns.ips)
+        successful && message('DNS Removed')
+      }
+    }
   }
 
   async showCurrentDns(): Promise<void> {
@@ -172,9 +167,10 @@ export class CommandHandler implements ICommandHandler {
     console.table(dnsProviders)
   }
 
-  private async printCurrentDnsName(dnsName: string) {
+  private printCurrentDnsName(dnsName: string): void {
     if (dnsName) message(`Current DNS: [${dnsName}]`)
-    else message('Current DNS: No DNS')
+    else if (dnsName === '') message('Current DNS: No DNS')
+    else return
   }
 
   private getRandomOption(list: IDnsProvider[], excludeNames: string[]) {
