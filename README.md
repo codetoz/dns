@@ -15,7 +15,7 @@ for linux and mac
 
 ```sh
 # release version
-version="1.0.0"
+version="v1.0.0"
 # macos linux
 platform=macos
 # x64 arm64
@@ -36,7 +36,7 @@ mv dns /usr/local/bin/
 
 for windows download the executable file from below link and add it to your `PATH`:
 
-`https://github.com/codetoz/dns/releases/download/1.0.0/dns-win-x64.exe`
+`https://github.com/codetoz/dns/releases/download/v1.0.0/dns-win-x64.exe`
 
 ## Commands
 
