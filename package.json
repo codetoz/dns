@@ -1,10 +1,19 @@
 {
   "name": "@codetoz/dns",
-  "version": "1.0.0-alpha-13",
+  "version": "1.0.0-alpha-15",
   "description": "Set DNS easily",
-  "main": "main.js",
+  "main": "./dist/src/main.js",
+  "bin": {
+    "dns": "./dist/src/main.js"
+  },
+  "files": [
+    "dist/**/*"
+  ],
   "scripts": {
-    "start": "node main",
+    "dev": "ts-node ./src/main.ts",
+    "clean": "rimraf ./dist/ ./exec/",
+    "build": "npm run clean && tsc",
+    "bundle": "npm run build && pkg . --out-dir ./exec/",
     "pub": "npm publish"
   },
   "repository": {
@@ -17,9 +26,6 @@
     "url": "https://github.com/codetoz/dns/issues"
   },
   "homepage": "https://github.com/codetoz/dns#readme",
-  "bin": {
-    "dns": "./main.js"
-  },
   "keywords": [
     "dns",
     "npm",
@@ -29,7 +35,14 @@
     "cli"
   ],
   "dependencies": {
-    "is-admin": "^4.0.0",
     "network": "^0.6.1"
+  },
+  "devDependencies": {
+    "@types/execa": "^2.0.0",
+    "@types/node": "^20.5.9",
+    "pkg": "^5.8.1",
+    "rimraf": "^5.0.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
   }
 }
