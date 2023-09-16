@@ -1,3 +1,5 @@
+#! /usr/bin/env node
+
 import { CommandHandler, commandPatterns } from './commands'
 
 async function bootstrap(): Promise<void> {
