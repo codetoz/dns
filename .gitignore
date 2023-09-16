@@ -7,3 +7,4 @@ exec
 
 # OS files
 .DS_Store
+.vscode

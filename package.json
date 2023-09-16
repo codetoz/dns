@@ -24,6 +24,7 @@
     "prebuild": "rimraf ./dist/ ./exec/",
     "build": "tsc",
     "bundle": "yarn build && pkg . -C GZip",
+    "prepub": "yarn build",
     "pub": "npm publish"
   },
   "repository": {
