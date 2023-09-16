@@ -6,7 +6,13 @@ import { getServers as getDnsServers } from 'dns'
 import { get_interfaces_list as getNetworkInterfacesList } from 'network'
 import { isAdmin } from './helpers/is-admin'
 
-const dnsOptions = [
+interface IOption {
+  name: string
+  ips: string[]
+  address: string
+}
+
+const dnsOptions: IOption[] = [
   {
     name: 'shecan',
     ips: ['178.22.122.100', '185.51.200.2'],
@@ -79,7 +85,12 @@ const dnsOptions = [
   },
 ]
 
-const commands = [
+interface ICommand {
+  name: string
+  desc: string
+}
+
+const commands: ICommand[] = [
   { name: 'dns [-s|set] <dns-name>', desc: 'Set Chosen DNS' },
   { name: 'dns [-alt|alter|change]', desc: 'Set Random Dns' },
   { name: 'dns [-r|rm|remove|clear]', desc: 'Remove DNS' },
@@ -89,10 +100,10 @@ const commands = [
   { name: 'dns [-h|help]', desc: 'List Commands' },
 ]
 
-async function bootstrap() {
+async function bootstrap(): Promise<void> {
   const args = process.argv.slice(2)
 
-  const commandsHandlers = await getCommands()
+  const commandsHandlers = await commandHandlers()
 
   if (/(-s)|(set)/.test(args[0])) {
     commandsHandlers.setDns(args)
@@ -131,18 +142,18 @@ async function bootstrap() {
 }
 
 //#region helpers
-function message(...message) {
+function message(...message: string[]): void {
   const prefix = '🥷'
 
   console.log(prefix, ...message)
 }
 
-function getRandomOption(list, exclude) {
-  const filtered = list.filter((option) => !exclude.includes(option.name))
+function getRandomOption(list: IOption[], excludeNames: string[]) {
+  const filtered = list.filter((option) => !excludeNames.includes(option.name))
   return filtered[Math.floor(Math.random() * filtered.length)]
 }
 
-async function execute(command) {
+async function execute(command: string) {
   return new Promise(function (resolve) {
     exec(command, (err, stdout) => {
       resolve(stdout)
@@ -153,42 +164,47 @@ async function execute(command) {
   })
 }
 
-async function getPlatform() {
+async function getPlatform(): Promise<string> {
   return platform()
 }
 
-async function printCurrentDnsName(dnsName) {
+async function printCurrentDnsName(dnsName: string) {
   if (dnsName) message(`Current DNS: [${dnsName}]`)
   else message('Current DNS: No DNS')
 }
 
-// #region windows-helpers
-function determinePowershellOrNetsh() {
+// windows
+function isNetsh(): boolean {
   // if version is Windows 7 or below use netsh
   var releaseVer = release().split('.')
-  if (
+
+  return (
     (parseInt(releaseVer[0]) <= 6 && parseInt(releaseVer[1]) <= 1) ||
     parseInt(releaseVer[0]) == 5
-  ) {
-    // use netsh
-    return true
-  }
-  // use powershell
-  return false
+  )
 }
-//#endregion
 
 //#endregion
 
 //#region commands
 
-async function getCommands() {
+interface ICommandHandler {
+  help: () => void
+  list: () => void
+  setDns: (args: string[]) => Promise<void>
+  removeDns: () => Promise<void>
+  showCurrentDns: () => Promise<void>
+  changeDns: () => Promise<void>
+  version: () => void
+}
+
+async function commandHandlers(): Promise<ICommandHandler> {
   const osType = await getPlatform()
   const isMac = osType.includes('darwin')
   const isLinux = osType.includes('linux')
   const isWindows = osType.includes('win32')
 
-  async function set(ips) {
+  async function set(ips: string[]) {
     if (isMac) {
       const ipString = ips.reduce((prev, current) => `${prev}${current} `, '')
 
@@ -217,7 +233,7 @@ async function getCommands() {
         const interfaces = obj
         // set DNS servers per ethernet interface
         for (const inf in interfaces) {
-          if (determinePowershellOrNetsh() /*|| windowsPreferNetsh === true*/) {
+          if (isNetsh() /*|| windowsPreferNetsh === true*/) {
             await execute(
               `netsh interface ipv4 set dns name="${interfaces[inf].name}" static "${ips[0]}" primary`
             )
@@ -236,7 +252,7 @@ async function getCommands() {
     }
   }
 
-  async function get() {
+  async function get(): Promise<string> {
     // let currentDns = "";
     let currentDnsName = ''
 
@@ -272,7 +288,7 @@ async function getCommands() {
     return currentDnsName
   }
 
-  async function setDns(args) {
+  async function setDns(args: string[]) {
     if (args.length < 2) {
       message('Provide a DNS name from list of options\n')
       list()
@@ -292,7 +308,7 @@ async function getCommands() {
     successful && message(`DNS Set [${option.name}]`)
   }
 
-  async function changeDns() {
+  async function changeDns(): Promise<void> {
     const currentDnsName = await get()
     printCurrentDnsName(currentDnsName)
     const option = getRandomOption(dnsOptions, [currentDnsName, 'google'])
@@ -300,7 +316,7 @@ async function getCommands() {
     successful && message(`DNS Set [${option.name}]`)
   }
 
-  async function removeDns() {
+  async function removeDns(): Promise<void> {
     if (isMac) await execute('networksetup -setdnsservers Wi-Fi "empty"')
 
     if (isLinux) {
@@ -312,21 +328,21 @@ async function getCommands() {
     message('DNS Removed')
   }
 
-  async function showCurrentDns() {
+  async function showCurrentDns(): Promise<void> {
     const dnsName = await get()
     printCurrentDnsName(dnsName)
   }
 
-  function version() {
+  function version(): void {
     message(`Package Version: ${packageVersion}`)
   }
 
-  function help() {
+  function help(): void {
     message('Commands:')
     console.table(commands)
   }
 
-  function list() {
+  function list(): void {
     console.table(dnsOptions)
   }
 
