@@ -6,14 +6,23 @@
   "bin": {
     "dns": "./dist/src/main.js"
   },
+  "pkg": {
+    "targets": [
+      "node18-linux-x64",
+      "node18-macos-arm64",
+      "node18-macos-x64",
+      "node18-win-x64"
+    ],
+    "outputPath": "exec"
+  },
   "files": [
     "dist/**/*"
   ],
   "scripts": {
     "dev": "ts-node ./src/main.ts",
-    "clean": "rimraf ./dist/ ./exec/",
-    "build": "npm run clean && tsc",
-    "bundle": "npm run build && pkg . --out-dir ./exec/",
+    "prebuild": "rimraf ./dist/ ./exec/",
+    "build": "tsc",
+    "bundle": "yarn build && pkg . -C GZip",
     "pub": "npm publish"
   },
   "repository": {

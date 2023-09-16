@@ -1,5 +1,3 @@
-#! /usr/bin/env node
-
 import { version as packageVersion } from '../package.json'
 
 import { platform, release } from 'os'
