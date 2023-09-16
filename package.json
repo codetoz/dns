@@ -1,6 +1,6 @@
 {
   "name": "@codetoz/dns",
-  "version": "1.0.0-alpha-18",
+  "version": "1.0.0",
   "description": "Set DNS easily",
   "main": "./dist/src/main.js",
   "bin": {

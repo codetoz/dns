@@ -14,12 +14,14 @@ If you do not have nodejs or want to use executable versions:
 for linux and mac
 
 ```sh
+# release version
+version="1.0.0"
 # macos linux
 platform=macos
 # x64 arm64
 arch=arm64
 
-curl -o dns https://github.com/codetoz/dns/releases/download/1.0.0-alpha-15/dns-$platform-$arch
+curl -o dns https://github.com/codetoz/dns/releases/download/$version/dns-$platform-$arch
 ```
 
 after that you can move it to your `bin`:
@@ -32,9 +34,9 @@ mv dns /usr/bin/
 mv dns /usr/local/bin/
 ```
 
-for windows download the below link and add it to your `PATH`:
+for windows download the executable file from below link and add it to your `PATH`:
 
-`https://github.com/codetoz/dns/releases/download/1.0.0-alpha-15/dns-win-x64.exe`
+`https://github.com/codetoz/dns/releases/download/1.0.0/dns-win-x64.exe`
 
 ## Commands
 
