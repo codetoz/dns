@@ -36,6 +36,11 @@ export class CommandHandler implements ICommandHandler {
     }
 
     if (this.isLinux) {
+      if (ips.length < 1) {
+        await execute(`echo "" > /etc/resolv.conf`)
+        return true
+      }
+
       const ipString = ips.reduce(
         (prev, current) => `${prev}\nnameserver ${current}`,
         ''
@@ -139,7 +144,12 @@ export class CommandHandler implements ICommandHandler {
       message('DNS Removed')
     }
 
-    if (this.isLinux || this.isWindows) {
+    if (this.isLinux) {
+      const successful = await this.set([])
+      successful && message('DNS Removed')
+    }
+
+    if (this.isWindows) {
       const googleDns = dnsProviders.find((dns) => dns.name === 'google')
 
       if (googleDns) {
